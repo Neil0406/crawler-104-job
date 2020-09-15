@@ -5,7 +5,9 @@ from selenium.webdriver.chrome.options import Options
 import time
 from tqdm import tqdm
 
-#爬取關鍵字為  python  的相關職缺 
+#關鍵見字python
+
+target = "python"
 
 #-------------------------計算頁數--------------------------------------------------------
 opt = Options()
@@ -13,7 +15,7 @@ opt.add_argument('--headless')
 chrome_driver_path = "/Users/Desktop/chromedriver"             #chromedriver path
 driver = webdriver.Chrome(executable_path = chrome_driver_path ,chrome_options=opt )
                                
-driver.get('https://www.104.com.tw/jobs/search/?ro=0&kwop=7&keyword=python&jobcatExpansionType=0&area=6001001000&order=15&asc=0&page=2&mode=s&jobsource=2018indexpoc')
+driver.get(f'https://www.104.com.tw/jobs/search/?ro=0&kwop=7&keyword={target}&jobcatExpansionType=0&area=6001001000&order=15&asc=0&page=2&mode=s&jobsource=2018indexpoc')
 time.sleep(1)
 html = driver.page_source
 soup = bs(html,'lxml')
@@ -26,7 +28,7 @@ driver.close()
 
 href = []
 for pg in tqdm(range(1,int(p) + 1)):
-    res = requests.get(f'https://www.104.com.tw/jobs/search/?ro=0&keyword=python&jobcatExpansionType=0&order=15&asc=0&page={pg}&mode=s&jobsource=2018indexpoc')
+    res = requests.get(f'https://www.104.com.tw/jobs/search/?ro=0&keyword={target}&jobcatExpansionType=0&order=15&asc=0&page={pg}&mode=s&jobsource=2018indexpoc')
     soup = bs(res.text,'lxml')
     x = soup.select('#js-job-content > article > div.b-block__left > h2 > a')
     for i in x:
@@ -183,4 +185,14 @@ dic = {
 
 
 df = pd.DataFrame(dic)
+data = df.to_dict('recode')
+
+#地區過濾（台北市）
+
+tp = []
+for i in data:
+    if '台北市' in i['地點']:
+         tp.append(i)
+df = pd.DataFrame(tp)
+     
 df.to_csv('104.csv',index=True, index_label= 'id')
